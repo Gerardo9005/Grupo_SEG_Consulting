@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /Assets/logos/
+Disallow: /private/
+
+# Indica a Google dónde está el mapa del sitio
+Sitemap: https://www.segconsulting.com.mx/sitemap.xml
