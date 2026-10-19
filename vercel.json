@@ -2,19 +2,19 @@
   "rewrites": [
     {
       "source": "/actualizat_app",
-      "destination": "https://TU_APP.vercel.app/actualizat_app"
+      "destination": "https://actualizate-app-v-1-0.vercel.app"
     },
     {
       "source": "/actualizat_app/:path*",
-      "destination": "https://TU_APP.vercel.app/actualizat_app/:path*"
+      "destination": "https://actualizate-app-v-1-0.vercel.appactualizat_app/:path*"
     },
     {
       "source": "/actualiza-t_app",
-      "destination": "https://TU_APP.vercel.app/actualizat_app"
+      "destination": "https://actualizat_app/actualizat_app"
     },
     {
       "source": "/actualiza-t_app/:path*",
-      "destination": "https://TU_APP.vercel.app/actualizat_app/:path*"
+      "destination": "https://actualizate-app-v-1-0.vercel.app/actualizat_app/:path*"
     }
   ]
 }
