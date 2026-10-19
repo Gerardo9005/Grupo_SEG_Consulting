@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/actualizat_app",
+      "destination": "https://TU_APP.vercel.app/actualizat_app"
+    },
+    {
+      "source": "/actualizat_app/:path*",
+      "destination": "https://TU_APP.vercel.app/actualizat_app/:path*"
+    },
+    {
+      "source": "/actualiza-t_app",
+      "destination": "https://TU_APP.vercel.app/actualizat_app"
+    },
+    {
+      "source": "/actualiza-t_app/:path*",
+      "destination": "https://TU_APP.vercel.app/actualizat_app/:path*"
+    }
+  ]
+}
