@@ -1,20 +1,71 @@
 {
-  "rewrites": [
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
     {
       "source": "/actualizat_app/:path*",
-      "destination": "https://actualizate-app-v-1-0-gerrys-projects-d95861ae.vercel.app/actualizat_app/:path*"
+      "destination": "https://www.actualizat.app/:path*",
+      "permanent": true
     },
     {
       "source": "/actualizat_app",
-      "destination": "https://actualizate-app-v-1-0-gerrys-projects-d95861ae.vercel.app/actualizat_app/"
+      "destination": "https://www.actualizat.app",
+      "permanent": true
     },
     {
       "source": "/actualiza-t_app/:path*",
-      "destination": "https://actualizate-app-v-1-0-gerrys-projects-d95861ae.vercel.app/actualizat_app/:path*"
+      "destination": "https://www.actualizat.app/:path*",
+      "permanent": true
     },
     {
       "source": "/actualiza-t_app",
-      "destination": "https://actualizate-app-v-1-0-gerrys-projects-d95861ae.vercel.app/actualizat_app/"
+      "destination": "https://www.actualizat.app",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/docs/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "inline"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
     }
   ]
 }
