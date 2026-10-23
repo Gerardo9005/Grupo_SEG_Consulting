@@ -1,3 +1,11 @@
+/**
+ * Grupo SEG Consulting - Lógica de Interfaz y Ecosistema Web
+ * Versión: 2026.1
+ */
+
+// ==========================================================================
+// Base de Datos de Cursos y Capacitaciones STPS
+// ==========================================================================
 const cursos = [
     { nombre: "NOM-031-STPS-2011, CONSTRUCCIÓN-CONDICIONES DE SEGURIDAD Y SALUD EN EL TRABAJO.", duracion: "16 HORAS", area: "6000 SEGURIDAD" },
     { nombre: "NORMA OFICIAL MEXICANA NOM-009-STPS-2011, CONDICIONES DE SEGURIDAD PARA REALIZAR TRABAJOS EN ALTURA.", duracion: "8 HORAS", area: "6000 SEGURIDAD" },
@@ -24,14 +32,29 @@ const cursos = [
     { nombre: "SEGURIDAD VIAL Y TRÁNSITO DENTRO DE OBRA", duracion: "4 HORAS", area: "6000 SEGURIDAD" },
     { nombre: "OPERACIÓN SEGURA DE HERRAMIENTAS ROTATORIAS", duracion: "8 HORAS", area: "6000 SEGURIDAD" },
     { nombre: "BLOQUEO CANDADEO Y ETIQUETADO", duracion: "16 HORAS", area: "6000 SEGURIDAD" },
-    { nombre: "ENSAMBLE E INSTALACIONES DE RACKS", duracion: "8 HORAS", area: "6000 SEGURIDAD" },
+    { nombre: "ENSAMBLE E INSTALACIONES DE RACKS", duracion: "8 HORAS", area: "6000 SEGURIDAD" }
 ];
 
-function cargarTabla() {
+// ==========================================================================
+// Carga y Filtrado del Catálogo de Capacitaciones
+// ==========================================================================
+function cargarTabla(datos = cursos) {
     const tableBody = document.getElementById('tableBody');
     if (!tableBody) return;
     
-    tableBody.innerHTML = cursos.map(curso => `
+    if (datos.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="3" style="text-align: center; padding: 25px; color: var(--gris-seg);">
+                    <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                    No se encontraron capacitaciones que coincidan con la búsqueda.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tableBody.innerHTML = datos.map(curso => `
         <tr>
             <td class="course-name">${curso.nombre}</td>
             <td><span class="badge-time">${curso.duracion}</span></td>
@@ -44,58 +67,65 @@ function filterTable() {
     const input = document.getElementById("courseSearch");
     if (!input) return;
     
-    const filter = input.value.toUpperCase();
-    const table = document.getElementById("coursesTable");
-    if (!table) return;
+    const query = input.value.trim().toLowerCase();
     
-    const tr = table.getElementsByTagName("tr");
-
-    for (let i = 1; i < tr.length; i++) {
-        const td = tr[i].getElementsByTagName("td")[0];
-        if (td) {
-            const txtValue = td.textContent || td.innerText;
-            tr[i].style.display = txtValue.toUpperCase().indexOf(filter) > -1 ? "" : "none";
-        }
+    if (!query) {
+        cargarTabla(cursos);
+        return;
     }
+
+    const resultados = cursos.filter(curso => 
+        curso.nombre.toLowerCase().includes(query) ||
+        curso.duracion.toLowerCase().includes(query) ||
+        curso.area.toLowerCase().includes(query)
+    );
+
+    cargarTabla(resultados);
 }
 
 function buscarCurso() {
     filterTable();
 }
 
-const courseSearchInput = document.getElementById("courseSearch");
-if (courseSearchInput) {
-    courseSearchInput.addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            filterTable();
-        }
-    });
-}
-
-const telInput = document.querySelector('input[name="telefono"]');
-if (telInput) {
-    telInput.addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
-    });
-}
-
+// ==========================================================================
+// Interacción y Navegación Dinámica
+// ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
     cargarTabla();
-    
-    const navbarHeight = document.querySelector('.navbar').offsetHeight;
-    const sections = document.querySelectorAll('section, header');
+
+    // Búsqueda en vivo al teclear en el campo de búsqueda
+    const courseSearchInput = document.getElementById("courseSearch");
+    if (courseSearchInput) {
+        courseSearchInput.addEventListener("input", filterTable);
+        courseSearchInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                filterTable();
+            }
+        });
+    }
+
+    // Formateo y validación de teléfono (solo números, máximo 10 dígitos)
+    const telInput = document.querySelector('input[name="telefono"]');
+    if (telInput) {
+        telInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+        });
+    }
+
+    // Scroll suave compensando la barra de navegación fija
+    const navbar = document.querySelector('.navbar');
+    const navbarHeight = navbar ? navbar.offsetHeight : 70;
     const navLinks = document.querySelectorAll('.nav-links li a, .btn-nav');
 
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
-            e.preventDefault();
             const targetId = this.getAttribute('href');
-            
-            if (targetId === '#') return;
+            if (targetId === '#' || targetId === '#!' || targetId === '') return;
             
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
+                e.preventDefault();
                 const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
                 
                 window.scrollTo({
@@ -103,11 +133,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     behavior: 'smooth'
                 });
 
+                // Cierra el menú móvil al hacer clic en un enlace
                 const navLinksContainer = document.querySelector('.nav-links');
+                const menuToggle = document.getElementById('mobile-menu');
                 if (navLinksContainer && navLinksContainer.classList.contains('active')) {
                     navLinksContainer.classList.remove('active');
-                    const menuToggle = document.getElementById('mobile-menu');
                     if (menuToggle) {
+                        menuToggle.setAttribute('aria-expanded', 'false');
                         const icon = menuToggle.querySelector('i');
                         if (icon) {
                             icon.classList.remove('fa-times');
@@ -119,44 +151,87 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const observerOptions = {
-        root: null,
-        threshold: 0.3,
-        rootMargin: `-${navbarHeight}px 0px -60% 0px`
-    };
+    // Menú móvil hamburguesa
+    const menuToggle = document.getElementById('mobile-menu');
+    const navLinksContainer = document.querySelector('.nav-links');
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const id = entry.target.getAttribute('id');
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    const href = link.getAttribute('href');
-                    if (href === `#${id}`) {
-                        link.classList.add('active');
-                    }
-                });
+    if (menuToggle && navLinksContainer) {
+        menuToggle.addEventListener('click', () => {
+            const isActive = navLinksContainer.classList.toggle('active');
+            menuToggle.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+            
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-bars', !isActive);
+                icon.classList.toggle('fa-times', isActive);
             }
         });
-    }, observerOptions);
 
-    sections.forEach(section => observer.observe(section));
+        // Cerrar menú móvil al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!navLinksContainer.contains(e.target) && !menuToggle.contains(e.target) && navLinksContainer.classList.contains('active')) {
+                navLinksContainer.classList.remove('active');
+                menuToggle.setAttribute('aria-expanded', 'false');
+                const icon = menuToggle.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            }
+        });
+    }
+
+    // Observer para resaltar la sección activa en el menú
+    const observedSections = document.querySelectorAll('section[id], header[id]');
+    if ('IntersectionObserver' in window && observedSections.length > 0) {
+        const observerOptions = {
+            root: null,
+            threshold: 0.25,
+            rootMargin: `-${navbarHeight}px 0px -40% 0px`
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${id}`) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, observerOptions);
+
+        observedSections.forEach(section => observer.observe(section));
+    }
 });
 
+// ==========================================================================
+// Envío del Formulario de Contacto (AJAX)
+// ==========================================================================
 const contactForm = document.getElementById('contact-form');
 const overlay = document.getElementById('modal-overlay');
 
 if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        if (overlay) overlay.style.display = 'flex';
+
+        const submitBtn = contactForm.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Enviar Mensaje';
+
+        // Feedback de envío inmediato en el botón
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+        }
 
         const formData = new FormData(contactForm);
-        
+        const actionUrl = contactForm.getAttribute('action') || 'https://formsubmit.co/ajax/administracion@gruposegconsulting.com';
+
         try {
-            // IMPORTANTE: Aquí va tu correo real
-            const response = await fetch('https://formsubmit.co/ajax/gyaconsultores.servicios@gmail.com', {
+            const response = await fetch(actionUrl, {
                 method: 'POST',
                 body: formData,
                 headers: { 
@@ -166,30 +241,52 @@ if (contactForm) {
 
             const result = await response.json();
 
-            // Verificamos si FormSubmit devolvió éxito
-            if (response.ok && (result.success === "true" || result.success === true)) {
+            if (overlay) overlay.style.display = 'flex';
+
+            if (response.ok && (result.success === "true" || result.success === true || result.status === "success")) {
                 document.getElementById('modal-success').style.display = 'block';
                 document.getElementById('modal-error').style.display = 'none';
                 contactForm.reset();
             } else {
-                throw new Error('Error en el servidor');
+                throw new Error(result.message || 'Error en el procesamiento del formulario');
             }
         } catch (error) {
-            console.error("Error al enviar:", error);
+            console.error("Error al enviar formulario:", error);
+            if (overlay) overlay.style.display = 'flex';
             document.getElementById('modal-success').style.display = 'none';
             document.getElementById('modal-error').style.display = 'block';
         } finally {
-            // El overlay de carga se puede ocultar aquí si los modales no lo cubren
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
         }
     });
 }
 
-window.onload = function() {
+// ==========================================================================
+// Manejo de Modales de Alerta
+// ==========================================================================
+function cerrarModales() {
+    const overlay = document.getElementById('modal-overlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+        const successModal = document.getElementById('modal-success');
+        const errorModal = document.getElementById('modal-error');
+        if (successModal) successModal.style.display = 'none';
+        if (errorModal) errorModal.style.display = 'none';
+    }
+}
+
+// ==========================================================================
+// Banner y Gestión de Cookies
+// ==========================================================================
+window.addEventListener('load', () => {
     if (!localStorage.getItem('cookiesAceptadas')) {
         const banner = document.getElementById('cookie-banner');
         if (banner) banner.style.display = 'block';
     }
-}
+});
 
 function aceptarCookies() {
     localStorage.setItem('cookiesAceptadas', 'true');
@@ -202,6 +299,9 @@ function rechazarCookies() {
     if (banner) banner.style.display = 'none';
 }
 
+// ==========================================================================
+// Documentación Legal y Ventanas Emergentes
+// ==========================================================================
 const textosLegales = {
     cookies: `<div class="legal-modal-header">
         <div class="izquierda">
@@ -218,57 +318,23 @@ const textosLegales = {
     </div>
 
     <h3>Política de Cookies - Grupo SEG Consulting</h3>
-    <p>Última actualización: 13 de mayo de 2023</p>
-    <p>En <strong>Grupo SEG Consulting</strong>, nos comprometemos con la transparencia y el cumplimiento normativo en materia de seguridad, higiene y protección de datos. Esta Política explica qué son las cookies, cómo las utilizamos en nuestro sitio web y cómo puedes gestionarlas.</p>
+    <p>Última actualización: Enero 2026</p>
+    <p>En <strong>Grupo SEG Consulting</strong>, nos comprometemos con la transparencia y el cumplimiento normativo en materia de seguridad, higiene y protección de datos. Esta Política explica qué son las cookies, cómo las utilizamos en nuestro sitio web y cómo puede gestionarlas.</p>
     <h4>1. ¿Qué es una cookie?</h4>
-    <p>Una cookie es un pequeño archivo de texto que se almacena en tu navegador cuando visitas casi cualquier página web. Su utilidad es que la web sea capaz de recordar tu visita cuando vuelvas a navegar por esa página, facilitando la navegación y, en el caso de nuestro formulario de contacto, asegurando que tus datos se envíen correctamente.</p>
+    <p>Una cookie es un pequeño archivo de texto que se almacena en su navegador al visitar nuestro sitio web para garantizar el funcionamiento técnico, la seguridad de las peticiones y recordar decisiones básicas.</p>
     <h4>2. Cookies que utilizamos</h4>
-    <p>Dado que nuestro sitio es informativo y cuenta con un formulario de contacto, utilizamos las siguientes categorías:</p>
-    <p><strong>Cookies Técnicas (Necesarias):</strong> Son esenciales para que el sitio funcione. Permiten la comunicación de datos y el uso de elementos de seguridad durante la navegación. Sin estas, el formulario de contacto podría presentar fallas.</p>
-    <p><strong>Cookies de Análisis (Estadísticas):</strong> Google Analytics o herramientas similares nos ayudan a entender cómo interactúan los usuarios con nuestra web (secciones más visitadas, tiempo de permanencia). Estos datos son anónimos.</p>
-    <p><strong>Cookies de Funcionalidad:</strong> Permiten recordar decisiones básicas del usuario para ofrecer una mejor experiencia (como el idioma o haber aceptado ya este aviso).</p>
-    <h4>3. Detalle de Cookies en este sitio</h4>
-    <table>
-        <tr>
-           <th>Cookie</th>
-            <th>Origen</th>
-            <th>Propósito</th>
-            <th>Duración</th>
-        </tr>
-        <tr>
-            <td>_ga</td>
-            <td>Google Analytics</td>
-            <td>Utilizadas por Google Analytics para distinguir a los usuarios.</td>
-            <td>2 años</td>
-        </tr>
-        <tr>
-            <td>_gid</td>
-            <td>Google Analytics</td>
-            <td>Utilizadas por Google Analytics para distinguir a los usuarios.</td>
-            <td>24 horas</td>
-        </tr>
-        <tr>
-            <td>PHPSESSID</td>
-            <td>Grupo SEG Consulting</td>
-            <td>Gestiona la sesión del usuario en el formulario de contacto.</td>
-            <td>Sesión (se elimina al cerrar el navegador)</td>
-        </tr>
-    </table>
-    <h4>4. Gestión de cookies</h4>
-    <p>Tú tienes el control total. Puedes permitir, bloquear o eliminar las cookies instaladas en tu equipo mediante la configuración de las opciones del navegador que utilices:</p>
-    <p><strong>Google Chrome:</strong> Configuración > Privacidad y seguridad > Cookies y otros datos de sitios.</p>
-    <p><strong>Mozilla Firefox:</strong> Opciones > Privacidad y seguridad > Cookies y datos del sitio.</p>
-    <p><strong>Microsoft Edge:</strong> Configuración > Cookies y permisos del sitio > Administrar y eliminar cookies y datos del sitio.</p>
-    <p><strong>Safari:</strong> Preferencias > Privacidad > Gestionar datos de sitios web.</p>
-    <p>Ten en cuenta que bloquear ciertas cookies puede afectar la funcionalidad de nuestro sitio, especialmente el formulario de contacto.</p>
-    <h4>5. Cambios en la Política de Cookies</h4>
-    <p>Estamos comprometidos con la transparencia y el cumplimiento normativo. Por ello, esta Política de Cookies puede ser actualizada ocasionalmente para reflejar cambios en nuestras prácticas o en la legislación aplicable.</p>
-    <h4>6. Contacto</h4>
-    <p>Si tienes preguntas sobre nuestra Política de Cookies, contáctanos en:
+    <p><strong>Cookies Técnicas (Necesarias):</strong> Esenciales para el funcionamiento del portal y el despacho seguro de solicitudes de contacto.</p>
+    <p><strong>Cookies de Funcionalidad:</strong> Recuerdan preferencias tales como la aceptación del aviso de privacidad y cookies.</p>
+    <p><strong>Cookies de Análisis Estadístico:</strong> Permiten conocer patrones generales de navegación para mejorar la arquitectura del portal de forma anónima.</p>
+    <h4>3. Gestión y Configuración</h4>
+    <p>Puede permitir, bloquear o eliminar las cookies instaladas directamente en el menú de configuración de su navegador web (Google Chrome, Firefox, Edge, Safari).</p>
+    <h4>4. Contacto</h4>
+    <p>Para consultas legales sobre cookies y privacidad:</p>
     <ul>
-        <li><a href="mailto:info@gruposegconsulting.com">Correo: info@gruposegconsulting.com</a></li>
-        <li><a href="https://wa.me/525636108298">Teléfono: +52 563 610 8290</a></li>
+        <li>Correo: <a href="mailto:administracion@gruposegconsulting.com">administracion@gruposegconsulting.com</a></li>
+        <li>Teléfono: +52 (56) 36108290</li>
     </ul>`,
+
     privacidad: `<div class="legal-modal-header">
         <div class="izquierda">
             <img src="assets/logo/Logo-horizontal-301x60.png" alt="Logo Grupo SEG Consulting" class="legal-logo">
@@ -284,22 +350,20 @@ const textosLegales = {
     </div>
     
     <h3>Aviso de Privacidad Integral</h3>
-    <p>Última actualización: 13 de mayo de 2023</p>
+    <p>Última actualización: Enero 2026</p>
     <ul>
-        <li><strong>Responsable del tratamiento de sus datos personales Grupo SEG Consulting</strong> (en adelante "El Responsable"), con domicilio en Av. José López Portillo No. 100, Col. Villa de las Flores, Coacalco, Estado de México, es responsable de recabar sus datos personales, del uso que se le dé a los mismos y de su protección.</li>
-        <li><strong>Datos personales que se recaban</strong> Para las finalidades señaladas en el presente aviso, recabamos sus datos de identificación y contacto (Nombre, Empresa, Correo Electrónico y Teléfono) a través de nuestro formulario de contacto web. <strong>No recabamos datos personales sensibles.</strong></li>
+        <li><strong>Responsable del tratamiento de sus datos personales: Grupo SEG Consulting</strong>, con domicilio en Av. José López Portillo No. 100, Col. Villa de las Flores, Coacalco, Estado de México, C.P. 55700, es responsable de salvaguardar sus datos conforme a la legislación aplicable.</li>
+        <li><strong>Datos personales que se recaban:</strong> Únicamente recabamos datos de contacto profesional (Nombre, Correo Electrónico, Teléfono y requerimiento técnico). <strong>No recabamos datos personales sensibles.</strong></li>
     </ul>
-    <p><strong>Finalidades del tratamiento</strong> Sus datos serán utilizados para:</p>
+    <p><strong>Finalidades del tratamiento:</strong></p>
     <ul>
-        <li>Proveer los servicios de consultoría en Seguridad e Higiene solicitados.</li>
-        <li>Responder a sus dudas y comentarios.</li>
-        <li>Enviar cotizaciones de servicios y capacitaciones (DC-3).</li>
-        <li>Informar sobre cambios en la normatividad de la STPS o Protección Civil.</li>
+        <li>Atención y cotización de consultoría en Seguridad e Higiene y Protección Civil.</li>
+        <li>Emisión y programación de cursos normativos con constancias DC-3 ante la STPS.</li>
+        <li>Atención técnica personalizada y seguimiento a proyectos industriales.</li>
     </ul>
-    <ul>
-        <li><strong>Derechos ARCO</strong> Usted tiene derecho a <strong>Acceder, Rectificar y Cancelar</strong> sus datos personales, así como a <strong>Oponerse</strong> al tratamiento de los mismos o revocar el consentimiento que para tal fin nos haya otorgado. Para ello, deberá enviar una solicitud por escrito al correo: <strong>info@segconsulting.com</strong> indicando su nombre completo y el derecho que desea ejercer.</li>
-        <li><strong>Transferencia de datos</strong> Le informamos que sus datos personales no serán compartidos con terceros, salvo por requerimientos legales de las autoridades competentes (STPS, Protección Civil o autoridades judiciales).</li>
-    </ul>`,
+    <p><strong>Ejercicio de Derechos ARCO:</strong></p>
+    <p>Usted puede ejercer sus derechos de Acceso, Rectificación, Cancelación u Oposición enviando un correo a <strong>administracion@gruposegconsulting.com</strong> indicando su nombre completo y el motivo de su solicitud.</p>`,
+
     terminos: `<div class="legal-modal-header">
         <div class="izquierda">
             <img src="assets/logo/Logo-horizontal-301x60.png" alt="Logo Grupo SEG Consulting" class="legal-logo">
@@ -315,15 +379,14 @@ const textosLegales = {
     </div>
 
     <h3>Términos y Condiciones de Uso</h3>
-    <p>Bienvenido al sitio web de <strong>Grupo SEG Consulting</strong>. Al acceder y utilizar este sitio, usted acepta los siguientes términos:</p>
+    <p>Bienvenido al portal institucional de <strong>Grupo SEG Consulting</strong>. Al navegar en este sitio, usted acepta los siguientes términos:</p>
     <ul>
-        <li><strong>1. Propiedad Intelectual</strong> Todo el contenido de este sitio (textos, logotipos, herramientas digitales como Capacita-T, Actualiza-T, códigos y diseños) son propiedad de <strong>Grupo SEG Consulting</strong> o de sus respectivos autores bajo licencia. Queda prohibida la reproducción parcial o total sin autorización previa.</li>
-        <li><strong>2. Uso del Sitio</strong> El usuario se compromete a utilizar el sitio de manera lícita. Queda prohibido el uso de los formularios de contacto para enviar "spam", contenido ofensivo o software malicioso.</li>
-        <li><strong>3. Deslinde de Responsabilidad</strong> La información publicada en este sitio es de carácter informativo. Aunque nos esforzamos por mantener la información técnica y normativa actualizada, <strong>Grupo SEG Consulting</strong> no se hace responsable por decisiones tomadas por terceros basadas exclusivamente en el contenido de este sitio sin haber recibido una consultoría formal y personalizada.</li>
-        <li><strong>4. Herramientas Digitales y Recursos</strong> El acceso a demos o herramientas como "Actualiza-T" o "Capacita-T" está sujeto a disponibilidad y puede requerir credenciales específicas proporcionadas tras la contratación de servicios.</li>
-        <li><strong>5. Jurisdicción</strong> Para la interpretación y cumplimiento de estos términos, las partes se someten a la legislación aplicable en el <strong>Estado de México, México,</strong> renunciando a cualquier otro fuero que pudiera corresponderles por razón de sus domicilios presentes o futuros.</li>
+        <li><strong>1. Propiedad Intelectual:</strong> Todos los contenidos, logotipos, materiales y plataformas vinculadas (incluyendo Actualiza-T y Capacita-T) están protegidos por la Ley Federal del Derecho de Autor. Queda prohibida su reproducción sin consentimiento expreso por escrito.</li>
+        <li><strong>2. Uso del Sitio:</strong> El usuario se compromete a hacer uso legítimo de las herramientas y a no enviar contenido malicioso ni utilizar formularios para fines ajenos a los servicios profesionales de consultoría.</li>
+        <li><strong>3. Soluciones y Servicios:</strong> Los dictámenes técnicos, constancias DC-3 y planes de protección civil están sujetos a validación técnica en campo y apego estricto a las Normas Oficiales Mexicanas vigentes emitidas por la STPS y Protección Civil.</li>
+        <li><strong>4. Jurisdicción:</strong> Para la resolución de cualquier controversia, las partes se someten a los tribunales competentes en el Estado de México, renunciando a cualquier otro fuero correspondiente a su domicilio presente o futuro.</li>
     </ul>`
-}
+};
 
 function abrirLegal(tipo) {
     const area = document.getElementById('legal-content-area');
@@ -346,38 +409,28 @@ function cerrarLegal() {
     }
 }
 
-function cerrarModales() {
-    const overlay = document.getElementById('modal-overlay');
-    if (overlay) {
-        overlay.style.display = 'none';
-        const successModal = document.getElementById('modal-success');
-        const errorModal = document.getElementById('modal-error');
-        if (successModal) successModal.style.display = 'none';
-        if (errorModal) errorModal.style.display = 'none';
+// Cierre de modales con la tecla Escape y clic en el backdrop
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        cerrarLegal();
+        cerrarModales();
     }
-}
+});
 
-const menuToggle = document.getElementById('mobile-menu');
-const navLinksContainer = document.querySelector('.nav-links');
-
-if (menuToggle && navLinksContainer) {
-    menuToggle.addEventListener('click', () => {
-        navLinksContainer.classList.toggle('active');
-        const icon = menuToggle.querySelector('i');
-        if (icon) {
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
+const modalLegal = document.getElementById('modal-legal');
+if (modalLegal) {
+    modalLegal.addEventListener('click', (e) => {
+        if (e.target === modalLegal) {
+            cerrarLegal();
         }
     });
+}
 
-    document.addEventListener('click', (e) => {
-        if (!navLinksContainer.contains(e.target) && !menuToggle.contains(e.target)) {
-            navLinksContainer.classList.remove('active');
-            const icon = menuToggle.querySelector('i');
-            if (icon) {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
+const modalOverlay = document.getElementById('modal-overlay');
+if (modalOverlay) {
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            cerrarModales();
         }
     });
 }
