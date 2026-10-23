@@ -1,7 +1,17 @@
 User-agent: *
 Allow: /
-Disallow: /Assets/logos/
+
+# Evitar indexación de la página de cortesía/mantenimiento
+Disallow: /mantenimiento
+Disallow: /mantenimiento.html
+
+# Directorios de uso interno o restringido
 Disallow: /private/
 
-# Indica a Google dónde está el mapa del sitio
-Sitemap: https://www.segconsulting.com.mx/sitemap.xml
+# Permitir explícitamente el rastreo de recursos gráficos y documentos para Googlebot
+Allow: /assets/logo/
+Allow: /assets/docs/
+Allow: /assets/portfolio/
+
+# Ubicación canónica del mapa del sitio
+Sitemap: https://www.gruposegconsulting.com/sitemap.xml
