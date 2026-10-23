@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Página de Inicio / Landing Principal -->
   <url>
-    <loc>https://www.segconsulting.com.mx/</loc>
-    <lastmod>2025-05-20</lastmod>
+    <loc>https://www.gruposegconsulting.com/</loc>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.00</priority>
   </url>
+
+  <!-- Catálogo Oficial de Capacitaciones STPS 2026 (Indexable por Google) -->
   <url>
-    <loc>https://www.segconsulting.com.mx/#about</loc>
+    <loc>https://www.gruposegconsulting.com/assets/docs/SG-Catalogo-Cursos-2026.pdf</loc>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
+
+  <!-- Catálogo de Productos y Servicios 2026 (Indexable por Google) -->
   <url>
-    <loc>https://www.segconsulting.com.mx/#services</loc>
-    <priority>0.90</priority>
-  </url>
-  <url>
-    <loc>https://www.segconsulting.com.mx/#portfolio</loc>
+    <loc>https://www.gruposegconsulting.com/assets/docs/Prod&amp;services-2026.pdf</loc>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
-  </url>
-  <url>
-    <loc>https://www.segconsulting.com.mx/#resources</loc>
-    <priority>0.90</priority>
-  </url>
-  <url>
-    <loc>https://www.segconsulting.com.mx/#contact</loc>
-    <priority>0.70</priority>
   </url>
 </urlset>
